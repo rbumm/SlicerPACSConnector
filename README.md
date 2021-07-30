@@ -8,7 +8,7 @@ Supported query filters:
 *   PatientID (required)
 *   Modality
 *   AccessionNumber
-*   Series Description
+*   Series Description (projected)
 *   Date of Examination
 
 This extension (and Slicer) supports reading from PACS only.
