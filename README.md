@@ -11,6 +11,6 @@ Supported query filters:
 *   Series Description (projected)
 *   Date of Examination
 
-This extension (and Slicer) supports reading from PACS only.
+This extension (and Slicer) supports reading from PACS only. It has been tested with a hospital GEPACS as well as public PACS servers.  
 
 Slicer 4.13.xx is required.
