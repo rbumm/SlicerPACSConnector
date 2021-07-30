@@ -14,3 +14,4 @@ Date of Examination
 This extension (and Slicer) supports reading from PACS only. 
 
 Slicer 4.13.xx required. 
+
