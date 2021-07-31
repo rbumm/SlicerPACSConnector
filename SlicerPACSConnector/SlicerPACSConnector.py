@@ -17,12 +17,12 @@ class SlicerPACSConnector(ScriptedLoadableModule):
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
     self.parent.title = "SlicerPACSConnector"  # TODO: make this more human readable by adding spaces
-    self.parent.categories = ["Examples"]  # TODO: set categories (folders where the module shows up in the module selector)
+    self.parent.categories = ["Utilities"]  # TODO: set categories (folders where the module shows up in the module selector)
     self.parent.dependencies = []  # TODO: add here list of module names that this module requires
     self.parent.contributors = ["Rudolf Bumm (KSGR)"]  # TODO: replace with "Firstname Lastname (Organization)"
     # TODO: update with short description of the module and a link to online module documentation
     self.parent.helpText = """
-This is an example of scripted loadable module bundled in an extension.
+This is a 3D Slicer PACS connector module that performs data queries and retrievals from local or remote PACS systems. 
 See more information in <a href="https://connect.sivc.ch/organization/,DanaInfo=github.com,SSL+projectname#SlicerPACSConnector" >module documentation</a>.
 """
     # TODO: replace with organization, grant and thanks
@@ -64,7 +64,7 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     self.logic = None
     self._parameterNode = None
     self._updatingGUIFromParameterNode = False
-    self.version = 1.01
+    self.version = 1.02
     print('Version: {:.3}'.format(self.version))
 
   def setup(self):
@@ -114,6 +114,31 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     parser = configparser.SafeConfigParser()
     parser.read('PACSCONNECTOR.INI')
 
+    if parser.has_option('QUERY', 'patientID'): 
+        self.patientID = parser.get('QUERY','patientID')
+    else: 
+        self.patientID = ""
+
+    if parser.has_option('QUERY', 'accessionNumber'): 
+        self.accessionNumber = parser.get('QUERY','accessionNumber')
+    else: 
+        self.accessionNumber = ""
+
+    if parser.has_option('QUERY', 'modality'): 
+        self.modality = parser.get('QUERY','modality')
+    else: 
+        self.modality = ""
+
+    if parser.has_option('QUERY', 'seriesDescription'): 
+        self.seriesDescription = parser.get('QUERY','seriesDescription')
+    else: 
+        self.seriesDescription = ""
+
+    if parser.has_option('QUERY', 'studyDate'): 
+        self.studyDate = parser.get('QUERY','studyDate')
+    else: 
+        self.studyDate = ""
+
     if parser.has_option('PACS', 'callingAETitle'): 
         self.callingAETitle = parser.get('PACS','callingAETitle')
     else: 
@@ -150,8 +175,16 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     if self.calledHost == "dicomserver.co.uk":
         #public demo server
         self.ui.patientIDLineEdit.text = "Anon" 
+        self.ui.accessionNumberLineEdit.text = ""
         self.ui.modalityLineEdit.text = "" 
-        self.ui.accessionNumberLineEdit.text = "" 
+        self.ui.seriesDescriptionLineEdit.text = "" 
+        self.ui.studyDateLineEdit.text = "" 
+    else:
+        self.ui.patientIDLineEdit.text = self.patientID
+        self.ui.accessionNumberLineEdit.text = self.accessionNumber
+        self.ui.modalityLineEdit.text = self.modality
+        self.ui.seriesDescriptionLineEdit.text = self.seriesDescription 
+        self.ui.studyDateLineEdit.text = self.studyDate 
     
     self.ui.callingAETitleLineEdit.text = self.callingAETitle
     self.ui.calledAETitleLineEdit.text = self.calledAETitle 
@@ -309,6 +342,22 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     import configparser
     parser = configparser.SafeConfigParser()
     parser.read('PACSCONNECTOR.INI')
+    
+    self.patientID = self.ui.patientIDLineEdit.text
+    self.accessionNumber = self.ui.accessionNumberLineEdit.text
+    self.modality = self.ui.modalityLineEdit.text
+    self.seriesDescription = self.ui.seriesDescriptionLineEdit.text  
+    self.studyDate = self.ui.studyDateLineEdit.text
+
+    if not parser.has_section('QUERY'):
+        parser.add_section('QUERY')    
+
+    parser.set('QUERY','patientID', self.patientID)       
+    parser.set('QUERY','accessionNumber', self.accessionNumber)       
+    parser.set('QUERY','modality', self.modality)       
+    parser.set('QUERY','seriesDescription', self.seriesDescription)       
+    parser.set('QUERY','studyDate', self.studyDate)
+
 
     self.callingAETitle = self.ui.callingAETitleLineEdit.text
     self.calledAETitle = self.ui.calledAETitleLineEdit.text
@@ -329,6 +378,7 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
         parser.set('PACS','preferCGET', "True")
     else: 
         parser.set('PACS','preferCGET', "False")
+        
     with open('PACSCONNECTOR.INI', 'w') as configfile:    # save
         parser.write(configfile)
     
@@ -496,6 +546,9 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
                                 print(f" ... moving STUDY:>{study}< SERIES:>{series}<")
                                 success = dicomRetrieve.moveSeries(str(study),str(series))
                                 print(f"  - {'success' if success else 'failed'}")
+                        else:
+                             print(f" ... detected STUDY:>{study}< SERIES:>{series}<")
+
         
     
     #for study in dicomQuery.studyInstanceUIDQueried:
