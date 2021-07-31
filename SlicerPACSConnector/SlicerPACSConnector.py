@@ -19,7 +19,7 @@ class SlicerPACSConnector(ScriptedLoadableModule):
     self.parent.title = "SlicerPACSConnector"  # TODO: make this more human readable by adding spaces
     self.parent.categories = ["Examples"]  # TODO: set categories (folders where the module shows up in the module selector)
     self.parent.dependencies = []  # TODO: add here list of module names that this module requires
-    self.parent.contributors = ["John Doe (AnyWare Corp.)"]  # TODO: replace with "Firstname Lastname (Organization)"
+    self.parent.contributors = ["Rudolf Bumm (KSGR)"]  # TODO: replace with "Firstname Lastname (Organization)"
     # TODO: update with short description of the module and a link to online module documentation
     self.parent.helpText = """
 This is an example of scripted loadable module bundled in an extension.
@@ -64,6 +64,8 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     self.logic = None
     self._parameterNode = None
     self._updatingGUIFromParameterNode = False
+    self.version = 1.01
+    print('Version: {:.3}'.format(self.version))
 
   def setup(self):
     """
@@ -104,17 +106,58 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     # Buttons
     self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
     self.ui.queryButton.connect('clicked(bool)', self.onQueryButton)
-
-    self.ui.patientIDLineEdit.text = "Anon" 
-    self.ui.modalityLineEdit.text = "CT" 
-    self.ui.accessionNumberLineEdit.text = "" 
+    self.ui.savePACSAccessDataButton.connect('clicked(bool)', self.onSavePACSAccessDataButton)
+    self.ui.loadDemoPACSAccessDataButton.connect('clicked(bool)', self.onLoadDemoPACSAccessDataButton)
     
-    self.ui.callingAETitleLineEdit.text = "SLICER" 
-    self.ui.calledAETitleLineEdit.text = "ANYE" 
-    self.ui.storageAETitleLineEdit.text = "SLICER" 
-    self.ui.calledHostLineEdit.text = "dicomserver.co.uk" 
-    self.ui.calledPortLineEdit.text = "11112" 
-    self.preferCGET = True
+    
+    import configparser
+    parser = configparser.SafeConfigParser()
+    parser.read('PACSCONNECTOR.INI')
+
+    if parser.has_option('PACS', 'callingAETitle'): 
+        self.callingAETitle = parser.get('PACS','callingAETitle')
+    else: 
+        self.callingAETitle = "SLICER"
+
+    if parser.has_option('PACS', 'calledAETitle'): 
+        self.calledAETitle = parser.get('PACS','calledAETitle')
+    else: 
+        self.calledAETitle = "ANYE"
+
+    if parser.has_option('PACS', 'storageAETitle'): 
+        self.storageAETitle = parser.get('PACS','storageAETitle')
+    else: 
+        self.storageAETitle = "SLICER"
+
+    if parser.has_option('PACS', 'calledHost'): 
+        self.calledHost = parser.get('PACS','calledHost')
+    else: 
+        self.calledHost = "dicomserver.co.uk"
+
+    if parser.has_option('PACS', 'calledPort'): 
+        self.calledPort = parser.get('PACS','calledPort')
+    else: 
+        self.calledPort = "11112"
+
+    if parser.has_option('PACS', 'preferCGET'): 
+        if parser.get('PACS','preferCGET') == "True":
+            self.preferCGET = True
+        else:
+            self.preferCGET = False
+    else: 
+        self.preferCGET = True
+   
+    if self.calledHost == "dicomserver.co.uk":
+        #public demo server
+        self.ui.patientIDLineEdit.text = "Anon" 
+        self.ui.modalityLineEdit.text = "" 
+        self.ui.accessionNumberLineEdit.text = "" 
+    
+    self.ui.callingAETitleLineEdit.text = self.callingAETitle
+    self.ui.calledAETitleLineEdit.text = self.calledAETitle 
+    self.ui.storageAETitleLineEdit.text = self.storageAETitle 
+    self.ui.calledHostLineEdit.text = self.calledHost 
+    self.ui.calledPortLineEdit.text = self.calledPort
     self.ui.preferCGETCheckBox.checked = self.preferCGET
     
 
@@ -235,6 +278,62 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     self.preferCGET = self.ui.preferCGETCheckBox.checked
 
     self._parameterNode.EndModify(wasModified)
+    
+        
+  def onLoadDemoPACSAccessDataButton(self):
+    """
+    Populate GUI with data of a public server
+    """
+    self.callingAETitle = "SLICER"
+    self.calledAETitle = "ANYE"
+    self.storageAETitle = "SLICER"
+    self.calledHost = "dicomserver.co.uk"
+    self.calledPort = "11112"
+    self.preferCGET = True
+
+    self.ui.patientIDLineEdit.text = "Anon" 
+    self.ui.modalityLineEdit.text = "" 
+    self.ui.accessionNumberLineEdit.text = "" 
+    
+    self.ui.callingAETitleLineEdit.text = self.callingAETitle
+    self.ui.calledAETitleLineEdit.text = self.calledAETitle 
+    self.ui.storageAETitleLineEdit.text = self.storageAETitle 
+    self.ui.calledHostLineEdit.text = self.calledHost 
+    self.ui.calledPortLineEdit.text = self.calledPort
+    self.ui.preferCGETCheckBox.checked = self.preferCGET
+    
+  def onSavePACSAccessDataButton(self):
+    """
+    save PACS Access data
+    """
+    import configparser
+    parser = configparser.SafeConfigParser()
+    parser.read('PACSCONNECTOR.INI')
+
+    self.callingAETitle = self.ui.callingAETitleLineEdit.text
+    self.calledAETitle = self.ui.calledAETitleLineEdit.text
+    self.storageAETitle = self.ui.storageAETitleLineEdit.text
+    self.calledHost = self.ui.calledHostLineEdit.text  
+    self.calledPort = self.ui.calledPortLineEdit.text
+    self.preferCGET = self.ui.preferCGETCheckBox.checked
+
+    if not parser.has_section('PACS'):
+        parser.add_section('PACS')    
+
+    parser.set('PACS','callingAETitle', self.callingAETitle)       
+    parser.set('PACS','calledAETitle', self.calledAETitle)       
+    parser.set('PACS','storageAETitle', self.storageAETitle)       
+    parser.set('PACS','calledHost', self.calledHost)       
+    parser.set('PACS','calledPort', self.calledPort)
+    if self.preferCGET == True: 
+        parser.set('PACS','preferCGET', "True")
+    else: 
+        parser.set('PACS','preferCGET', "False")
+    with open('PACSCONNECTOR.INI', 'w') as configfile:    # save
+        parser.write(configfile)
+    
+    slicer.util.messageBox("PACS access data saved as default.")
+
 
   def onQueryButton(self):
     """

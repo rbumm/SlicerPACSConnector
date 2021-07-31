@@ -90,6 +90,13 @@
       <string>PACS communication settings</string>
      </property>
      <layout class="QFormLayout" name="formLayout_4">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Calling AE title</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
        <widget class="QLineEdit" name="callingAETitleLineEdit"/>
       </item>
@@ -103,19 +110,15 @@
       <item row="1" column="1">
        <widget class="QLineEdit" name="calledAETitleLineEdit"/>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>Calling AE title</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_9">
         <property name="text">
          <string>Storage AE title</string>
         </property>
        </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="storageAETitleLineEdit"/>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="label_10">
@@ -124,6 +127,9 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="calledHostLineEdit"/>
+      </item>
       <item row="4" column="0">
        <widget class="QLabel" name="label_11">
         <property name="text">
@@ -131,33 +137,13 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="storageAETitleLineEdit"/>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="calledHostLineEdit"/>
-      </item>
       <item row="4" column="1">
        <widget class="QLineEdit" name="calledPortLineEdit"/>
       </item>
-      <item row="6" column="1">
-       <widget class="QPushButton" name="loadDemoPACSAccessDataButton">
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_12">
         <property name="text">
-         <string>Load public PACS access data and query</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="QPushButton" name="savePACSAccessDataButton">
-        <property name="text">
-         <string>Save PACS access data</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QPushButton" name="loadPACSAccessDataButton">
-        <property name="text">
-         <string>Load PACS access data</string>
+         <string>Prefer C-GET</string>
         </property>
        </widget>
       </item>
@@ -168,10 +154,17 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_12">
+      <item row="6" column="1">
+       <widget class="QPushButton" name="loadDemoPACSAccessDataButton">
         <property name="text">
-         <string>Prefer C-GET</string>
+         <string>Load public PACS access data</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QPushButton" name="savePACSAccessDataButton">
+        <property name="text">
+         <string>Save current PACS access data as default</string>
         </property>
        </widget>
       </item>
