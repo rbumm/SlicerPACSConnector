@@ -28,7 +28,14 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="patientIDLineEdit"/>
+       <widget class="QLineEdit" name="patientIDLineEdit">
+        <property name="toolTip">
+         <string>Primary unique identifier for the patient.</string>
+        </property>
+        <property name="placeholderText">
+         <string>PD-1-MELANOMA-00016</string>
+        </property>
+       </widget>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_4">
@@ -38,7 +45,14 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="accessionNumberLineEdit"/>
+       <widget class="QLineEdit" name="accessionNumberLineEdit">
+        <property name="toolTip">
+         <string>A RIS generated number that identifies the order for the study.</string>
+        </property>
+        <property name="placeholderText">
+         <string>2819497684894126</string>
+        </property>
+       </widget>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="label_5">
@@ -48,7 +62,14 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QLineEdit" name="modalityLineEdit"/>
+       <widget class="QLineEdit" name="modalityLineEdit">
+        <property name="toolTip">
+         <string>Type of equipment that originally acquired the data used to create the images in this series.</string>
+        </property>
+        <property name="placeholderText">
+         <string>CT</string>
+        </property>
+       </widget>
       </item>
       <item row="5" column="0">
        <widget class="QLabel" name="label_6">
@@ -58,7 +79,14 @@
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QLineEdit" name="seriesDescriptionLineEdit"/>
+       <widget class="QLineEdit" name="seriesDescriptionLineEdit">
+        <property name="toolTip">
+         <string>Description of the series</string>
+        </property>
+        <property name="placeholderText">
+         <string>Lung art</string>
+        </property>
+       </widget>
       </item>
       <item row="6" column="0">
        <widget class="QLabel" name="label_3">
@@ -71,6 +99,9 @@
        <widget class="QLineEdit" name="studyDateLineEdit">
         <property name="toolTip">
          <string>Date of examination (Format: yyyymmdd)</string>
+        </property>
+        <property name="placeholderText">
+         <string>yyyymmdd</string>
         </property>
        </widget>
       </item>
