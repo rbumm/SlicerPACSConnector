@@ -425,8 +425,6 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
 
   def process(self, queryFlag, patientID, accessionNumber,modalities,seriesDescription,studyDate,\
                callingAETitle, calledAETitle,storageAETitle, calledHost,calledPort,preferCGET):
-  
-
     """
     Run the processing algorithm.
     Can be used without GUI widget.
@@ -475,29 +473,51 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     dicomRetrieve.setPort(dicomQuery.port)
     dicomRetrieve.setMoveDestinationAETitle(dicomQuery.callingAETitle)
     
-    for study in dicomQuery.studyInstanceUIDQueried:
-      slicer.app.processEvents()
-      if dicomQuery.preferCGET:
-        print(f" ... getting  {study}")
-        if queryFlag==0: 
-            success = dicomRetrieve.getStudy(study)
-      else:
-        print(f"... moving {study}")
-        if queryFlag==0: 
-           success = dicomRetrieve.moveStudy(study)
-      if queryFlag==0: 
-        print(f"  - {'success' if success else 'failed'}")
+    patientList = tempDb.patients()
+    if not patientList: 
+        print("No results.")
+    else: 
+        studyList = tempDb.studiesForPatient(patientList[0])
+        if not studyList: 
+            print("Patient detected, but no studies for this patient available.")
+        else:             
+            seriesList = tempDb.seriesForStudy(studyList[0])
+            if not seriesList: 
+                print("Patient and study detected, but no series for this patient and study available.")
+            else:             
+                for study in studyList:
+                    for series in seriesList: 
+                        if queryFlag==0:
+                            if dicomQuery.preferCGET:
+                                print(f" ... getting STUDY:>{study}< SERIES:>{series}<")
+                                success = dicomRetrieve.getSeries(str(study),str(series))
+                                print(f"  - {'success' if success else 'failed'}")
+                            else: 
+                                print(f" ... moving STUDY:>{study}< SERIES:>{series}<")
+                                success = dicomRetrieve.moveSeries(str(study),str(series))
+                                print(f"  - {'success' if success else 'failed'}")
+        
+    
+    #for study in dicomQuery.studyInstanceUIDQueried:
+    #  slicer.app.processEvents()
+    #  if dicomQuery.preferCGET:
+    #    print(f" ... getting  {study}")
+    #    if queryFlag==0: 
+    #        success = dicomRetrieve.getStudy(study)
+    #  else:
+    #    print(f"... moving {study}")
+    #    if queryFlag==0: 
+    #       success = dicomRetrieve.moveStudy(study)
+    #  if queryFlag==0: 
+    #    print(f"  - {'success' if success else 'failed'}")
       
     #if _process == False: 
     #  for obj in retrieveList: 
     #    print(obj.date,obj.name,obj.studyUID,obj.seriesUID,obj.acNumber) 
     #    success = dicomRetrieve.moveSeries(obj.studyUID.decode("utf-8"),obj.seriesUID.decode("utf-8"))
     #    print(f"  - {'success' if success else 'failed'}")
-
-      
-      
-    slicer.dicomDatabase.updateDisplayedFields()    
     
+    slicer.dicomDatabase.updateDisplayedFields()
     
     stopTime = time.time()
     logging.info('Processing completed in {0:.2f} seconds'.format(stopTime-startTime))
