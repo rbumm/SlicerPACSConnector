@@ -8,7 +8,7 @@ Supported query filters:
 *   PatientID (required)
 *   Modality
 *   AccessionNumber
-*   Series Description (projected)
+*   Series Description
 *   Date of Examination
 
 The possibility to query PACS data according to their AccessionNumber (new) is helpful because this key identifies the order in the DICOM worklist. 
