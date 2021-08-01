@@ -11,7 +11,7 @@ Supported query filters:
 *   Series Description (projected)
 *   Date of Examination
 
-This extension (and Slicer) supports reading from PACS only. SlicerPACSConnector undergoes continuous testing with a hospital GEPACS (KSGR, Switzerland) as well as public PACS servers.  
+This extension (and Slicer) supports reading from PACS only. SlicerPACSConnector undergoes continuous testing with a hospital GEPACS as well as public PACS servers.  
 
 Slicer 4.13.xx and a recent CTK are required.
 
