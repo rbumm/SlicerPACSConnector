@@ -66,6 +66,7 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     self._updatingGUIFromParameterNode = False
     self.version = 1.02
     print('Version: {:.3}'.format(self.version))
+    self.showRetrievalWarning = True
 
   def setup(self):
     """
@@ -440,10 +441,14 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
       self.calledHostStr = self.ui.calledHostLineEdit.text
       self.calledPortStr = self.ui.calledPortLineEdit.text
       self.preferCGET = self.ui.preferCGETCheckBox.checked
-      
+      if self.showRetrievalWarning:
+          slicer.util.delayDisplay('Expect several minutes of waiting time depending on your query.\nEnd of progress will be shown in the python console.',3000)
       self.logic.process(queryFlag,self.patientIDStr,self.accessionNumberStr,self.modalityStr,self.seriesDescriptionStr,self.studyDateStr, \
         self.callingAETitleStr, self.calledAETitleStr,self.storageAETitleStr, self.calledHostStr,self.calledPortStr,self.preferCGET)
-
+      if self.showRetrievalWarning:
+          slicer.util.delayDisplay('Normal end of processing. Check the DICOM database for new data \nand remember, that data may still be loading in the background.',10000)
+          self.showRetrievalWarning = False      
+ 
 
     except Exception as e:
       slicer.util.errorDisplay("Failed to compute results: "+str(e))
@@ -492,7 +497,7 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
 
     import time
     startTime = time.time()
-    logging.info('Processing started')
+    logging.info('Processing started ...')
 
     if not patientID:
       raise ValueError("You need to specify a patientID.")
@@ -519,13 +524,13 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
       newState = 0
 
     if newState == 0:
-      print("DICOM listener not running.")
+      logging.info("DICOM listener not running.")
       slicer.modules.DICOMInstance.startListener()
     if newState == 1:
-      print("DICOM listener starting ...")
+      logging.info("DICOM listener starting ...")
     if newState == 2:
       port = str(slicer.dicomListener.port) if hasattr(slicer, 'dicomListener') else "unknown"
-      print("DICOM listener running at port "+port)
+      logging.info("DICOM listener running at port "+port)
    
     # Query
     dicomQuery = ctk.ctkDICOMQuery()
@@ -560,29 +565,31 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     
     patientList = tempDb.patients()
     if not patientList: 
-        print("No results.")
+        logging.info("No results.")
     else: 
         studyList = tempDb.studiesForPatient(patientList[0])
         if not studyList: 
-            print("Patient detected, but no studies for this patient available.")
+            logging.info("Patient detected, but no studies for this patient available.")
         else:             
             seriesList = tempDb.seriesForStudy(studyList[0])
             if not seriesList: 
-                print("Patient and study detected, but no series for this patient and study available.")
+                logging.info("Patient and study detected, but no series for this patient and study available.")
             else:             
                 for study in studyList:
-                    for series in seriesList: 
+                    slicer.app.processEvents()
+                    for series in seriesList:
+                        slicer.app.processEvents()                    
                         if queryFlag==0:
                             if dicomQuery.preferCGET:
-                                print(f" ... getting STUDY:>{study}< SERIES:>{series}<")
+                                logging.info(f" ... getting STUDY:>{study}< SERIES:>{series}<")
                                 success = dicomRetrieve.getSeries(str(study),str(series))
-                                print(f"  - {'success' if success else 'failed'}")
+                                logging.info(f"  - {'success' if success else 'failed'}")
                             else: 
-                                print(f" ... moving STUDY:>{study}< SERIES:>{series}<")
+                                logging.info(f" ... moving STUDY:>{study}< SERIES:>{series}<")
                                 success = dicomRetrieve.moveSeries(str(study),str(series))
-                                print(f"  - {'success' if success else 'failed'}")
+                                logging.info(f"  - {'success' if success else 'failed'}")
                         else:
-                             print(f" ... detected STUDY:>{study}< SERIES:>{series}<")
+                             logging.info(f" ... detected STUDY:>{study}< SERIES:>{series}<")
 
         
     slicer.dicomDatabase.updateDisplayedFields()
