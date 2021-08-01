@@ -78,6 +78,10 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     uiWidget = slicer.util.loadUI(self.resourcePath('UI/SlicerPACSConnector.ui'))
     self.layout.addWidget(uiWidget)
     self.ui = slicer.util.childWidgetVariables(uiWidget)
+    
+    # show version on GUI 
+    self.versionText = "Slicer PACS Connector V %.2f" % self.version       
+    self.ui.versionLabel.text = self.versionText
 
     # Set scene in MRML widgets. Make sure that in Qt designer the top-level qMRMLWidget's
     # "mrmlSceneChanged(vtkMRMLScene*)" signal in is connected to each MRML widget's.
