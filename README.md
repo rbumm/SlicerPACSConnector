@@ -16,3 +16,7 @@ This extension (and Slicer) supports reading from PACS only. SlicerPACSConnector
 Slicer 4.13.xx and a recent CTK are required.
 
 _This project is in active development and is not FDA approved_
+
+_Screenshot:_ 
+
+![](https://user-images.githubusercontent.com/18140094/127771219-393deea0-c531-4592-bd1f-0a988a55f400.png)
