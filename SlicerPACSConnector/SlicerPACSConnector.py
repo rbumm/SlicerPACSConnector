@@ -242,7 +242,6 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
 
     self.setParameterNode(self.logic.getParameterNode())
 
-
   def setParameterNode(self, inputParameterNode):
     """
     Set and observe parameter node.
@@ -492,6 +491,21 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
       raise ValueError("You need to specify a patient ID.")
 
    
+    # check status of DICOM listener, must be running to retrieve images
+    if hasattr(slicer, 'dicomListener') and slicer.dicomListener.process is not None:
+      newState = slicer.dicomListener.process.state()
+    else:
+      newState = 0
+
+    if newState == 0:
+      print("DICOM listener not running.")
+      slicer.modules.DICOMInstance.startListener()
+    if newState == 1:
+      print("DICOM listener starting ...")
+    if newState == 2:
+      port = str(slicer.dicomListener.port) if hasattr(slicer, 'dicomListener') else "unknown"
+      print("DICOM listener running at port "+port)
+   
     # Query
     dicomQuery = ctk.ctkDICOMQuery()
     dicomQuery.callingAETitle = callingAETitle
@@ -550,26 +564,6 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
                              print(f" ... detected STUDY:>{study}< SERIES:>{series}<")
 
         
-    
-    #for study in dicomQuery.studyInstanceUIDQueried:
-    #  slicer.app.processEvents()
-    #  if dicomQuery.preferCGET:
-    #    print(f" ... getting  {study}")
-    #    if queryFlag==0: 
-    #        success = dicomRetrieve.getStudy(study)
-    #  else:
-    #    print(f"... moving {study}")
-    #    if queryFlag==0: 
-    #       success = dicomRetrieve.moveStudy(study)
-    #  if queryFlag==0: 
-    #    print(f"  - {'success' if success else 'failed'}")
-      
-    #if _process == False: 
-    #  for obj in retrieveList: 
-    #    print(obj.date,obj.name,obj.studyUID,obj.seriesUID,obj.acNumber) 
-    #    success = dicomRetrieve.moveSeries(obj.studyUID.decode("utf-8"),obj.seriesUID.decode("utf-8"))
-    #    print(f"  - {'success' if success else 'failed'}")
-    
     slicer.dicomDatabase.updateDisplayedFields()
     
     stopTime = time.time()
