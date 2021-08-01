@@ -1,6 +1,6 @@
-# SlicerPACSConnector
+# PACS Connector
 
-The SlicerPACSConnector is a 3D Slicer extension that offers a simple and clear interface between 3D Slicer and your local or remote PACS.  
+The  PACS Connector is a 3D Slicer extension that offers a simple and clear interface between 3D Slicer and your local or remote PACS.  
 You can choose between a simple "query" as well as a "query and retrieve from PACS" including the transfer of the image data to Slicers' DICOM database.
 
 Supported query filters:
