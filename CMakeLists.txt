@@ -5,11 +5,11 @@ project(SlicerPACSConnector)
 #-----------------------------------------------------------------------------
 # Extension meta-information
 set(EXTENSION_HOMEPAGE "https://www.slicer.org/wiki/Documentation/Nightly/Extensions/SlicerPACSConnector")
-set(EXTENSION_CATEGORY "Examples")
-set(EXTENSION_CONTRIBUTORS "John Doe (AnyWare Corp.)")
-set(EXTENSION_DESCRIPTION "This is an example of a simple extension")
-set(EXTENSION_ICONURL "http://www.example.com/Slicer/Extensions/SlicerPACSConnector.png")
-set(EXTENSION_SCREENSHOTURLS "http://www.example.com/Slicer/Extensions/SlicerPACSConnector/Screenshots/1.png")
+set(EXTENSION_CATEGORY "Utilities")
+set(EXTENSION_CONTRIBUTORS "Rudolf Bumm (KSGR)")
+set(EXTENSION_DESCRIPTION "The PACS Connector extension enables querying your local or remote PACS from a clear and easily accessible interface within 3D Slicer and offers new filter parameters.")
+set(EXTENSION_ICONURL "https://raw.githubusercontent.com/rbumm/SlicerPACSConnector/master/SlicerPACSConnector.png")
+set(EXTENSION_SCREENSHOTURLS "https://user-images.githubusercontent.com/18140094/127771219-393deea0-c531-4592-bd1f-0a988a55f400.png")
 set(EXTENSION_DEPENDS "NA") # Specified as a list or "NA" if no dependencies
 
 #-----------------------------------------------------------------------------
