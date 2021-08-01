@@ -16,7 +16,7 @@ class SlicerPACSConnector(ScriptedLoadableModule):
 
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
-    self.parent.title = "SlicerPACSConnector"  # TODO: make this more human readable by adding spaces
+    self.parent.title = "PACS Connector"  # TODO: make this more human readable by adding spaces
     self.parent.categories = ["Utilities"]  # TODO: set categories (folders where the module shows up in the module selector)
     self.parent.dependencies = []  # TODO: add here list of module names that this module requires
     self.parent.contributors = ["Rudolf Bumm (KSGR)"]  # TODO: replace with "Firstname Lastname (Organization)"
@@ -177,10 +177,10 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
         self.preferCGET = True
    
     if self.calledHost == "dicomserver.co.uk":
-        #public demo server
-        self.ui.patientIDLineEdit.text = "Anon" 
+        #CT on a public demo server
+        self.ui.patientIDLineEdit.text = "IHIPXA" 
         self.ui.accessionNumberLineEdit.text = ""
-        self.ui.modalityLineEdit.text = "" 
+        self.ui.modalityLineEdit.text = "CT" 
         self.ui.seriesDescriptionLineEdit.text = "" 
         self.ui.studyDateLineEdit.text = "" 
     else:
@@ -327,9 +327,12 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     self.calledPort = "11112"
     self.preferCGET = True
 
-    self.ui.patientIDLineEdit.text = "Anon" 
-    self.ui.modalityLineEdit.text = "" 
+    self.ui.patientIDLineEdit.text = "IHIPXA" 
     self.ui.accessionNumberLineEdit.text = "" 
+    self.ui.modalityLineEdit.text = "CT" 
+    self.ui.seriesDescriptionLineEdit.text = "" 
+    self.ui.studyDateLineEdit.text = "" 
+    
     
     self.ui.callingAETitleLineEdit.text = self.callingAETitle
     self.ui.calledAETitleLineEdit.text = self.calledAETitle 
