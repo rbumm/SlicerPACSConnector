@@ -490,6 +490,20 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     if not patientID:
       raise ValueError("You need to specify a patient ID.")
 
+    if not callingAETitle:
+      raise ValueError("callingAETitle missing.")
+
+    if not calledAETitle:
+      raise ValueError("calledAETitle missing.")
+
+    if not storageAETitle:
+      raise ValueError("storageAETitle missing.")
+
+    if not calledHost:
+      raise ValueError("calledHost missing.")
+
+    if not calledPort:
+      raise ValueError("calledPort missing.")
    
     # check status of DICOM listener, must be running to retrieve images
     if hasattr(slicer, 'dicomListener') and slicer.dicomListener.process is not None:
