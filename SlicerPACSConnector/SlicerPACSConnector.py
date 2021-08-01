@@ -491,8 +491,8 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     startTime = time.time()
     logging.info('Processing started')
 
-    if not patientID and not accessionNumber:
-      raise ValueError("You need to specify either a patientID or an accessionNumber.")
+    if not patientID:
+      raise ValueError("You need to specify a patientID.")
 
     if not callingAETitle:
       raise ValueError("callingAETitle missing.")
