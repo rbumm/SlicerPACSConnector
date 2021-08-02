@@ -400,16 +400,16 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
       # Compute output
       queryFlag = 1
       
-      self.patientIDStr = self.ui.patientIDLineEdit.text
-      self.accessionNumberStr = self.ui.accessionNumberLineEdit.text
-      self.modalityStr = self.ui.modalityLineEdit.text
-      self.seriesDescriptionStr = self.ui.seriesDescriptionLineEdit.text
-      self.studyDateStr = self.ui.studyDateLineEdit.text
-      self.callingAETitleStr = self.ui.callingAETitleLineEdit.text
-      self.calledAETitleStr = self.ui.calledAETitleLineEdit.text
-      self.storageAETitleStr = self.ui.storageAETitleLineEdit.text
-      self.calledHostStr = self.ui.calledHostLineEdit.text
-      self.calledPortStr = self.ui.calledPortLineEdit.text
+      self.patientIDStr = self.ui.patientIDLineEdit.text.strip()
+      self.accessionNumberStr = self.ui.accessionNumberLineEdit.text.strip()
+      self.modalityStr = self.ui.modalityLineEdit.text.strip()
+      self.seriesDescriptionStr = self.ui.seriesDescriptionLineEdit.text.strip()
+      self.studyDateStr = self.ui.studyDateLineEdit.text.strip()
+      self.callingAETitleStr = self.ui.callingAETitleLineEdit.text.strip()
+      self.calledAETitleStr = self.ui.calledAETitleLineEdit.text.strip()
+      self.storageAETitleStr = self.ui.storageAETitleLineEdit.text.strip()
+      self.calledHostStr = self.ui.calledHostLineEdit.text.strip()
+      self.calledPortStr = self.ui.calledPortLineEdit.text.strip()
       self.preferCGET = self.ui.preferCGETCheckBox.checked
       
       self.logic.process(queryFlag,self.patientIDStr,self.accessionNumberStr,self.modalityStr,self.seriesDescriptionStr,self.studyDateStr, \
@@ -430,16 +430,16 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
       # Compute output
       queryFlag = 0
       
-      self.patientIDStr = self.ui.patientIDLineEdit.text
-      self.accessionNumberStr = self.ui.accessionNumberLineEdit.text
-      self.modalityStr = self.ui.modalityLineEdit.text
-      self.seriesDescriptionStr = self.ui.seriesDescriptionLineEdit.text
-      self.studyDateStr = self.ui.studyDateLineEdit.text
-      self.callingAETitleStr = self.ui.callingAETitleLineEdit.text
-      self.calledAETitleStr = self.ui.calledAETitleLineEdit.text
-      self.storageAETitleStr = self.ui.storageAETitleLineEdit.text
-      self.calledHostStr = self.ui.calledHostLineEdit.text
-      self.calledPortStr = self.ui.calledPortLineEdit.text
+      self.patientIDStr = self.ui.patientIDLineEdit.text.strip()
+      self.accessionNumberStr = self.ui.accessionNumberLineEdit.text.strip()
+      self.modalityStr = self.ui.modalityLineEdit.text.strip()
+      self.seriesDescriptionStr = self.ui.seriesDescriptionLineEdit.text.strip()
+      self.studyDateStr = self.ui.studyDateLineEdit.text.strip()
+      self.callingAETitleStr = self.ui.callingAETitleLineEdit.text.strip()
+      self.calledAETitleStr = self.ui.calledAETitleLineEdit.text.strip()
+      self.storageAETitleStr = self.ui.storageAETitleLineEdit.text.strip()
+      self.calledHostStr = self.ui.calledHostLineEdit.text.strip()
+      self.calledPortStr = self.ui.calledPortLineEdit.text.strip()
       self.preferCGET = self.ui.preferCGETCheckBox.checked
       if self.showRetrievalWarning:
           slicer.util.delayDisplay('Expect several minutes of waiting time depending on your query.\nEnd of progress will be shown in the python console.',3000)
