@@ -177,19 +177,11 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     else: 
         self.preferCGET = True
    
-    if self.calledHost == "dicomserver.co.uk":
-        #CT on a public demo server
-        self.ui.patientIDLineEdit.text = "IHIPXA" 
-        self.ui.accessionNumberLineEdit.text = ""
-        self.ui.modalityLineEdit.text = "CT" 
-        self.ui.seriesDescriptionLineEdit.text = "" 
-        self.ui.studyDateLineEdit.text = "" 
-    else:
-        self.ui.patientIDLineEdit.text = self.patientID
-        self.ui.accessionNumberLineEdit.text = self.accessionNumber
-        self.ui.modalityLineEdit.text = self.modality
-        self.ui.seriesDescriptionLineEdit.text = self.seriesDescription 
-        self.ui.studyDateLineEdit.text = self.studyDate 
+    self.ui.patientIDLineEdit.text = self.patientID
+    self.ui.accessionNumberLineEdit.text = self.accessionNumber
+    self.ui.modalityLineEdit.text = self.modality
+    self.ui.seriesDescriptionLineEdit.text = self.seriesDescription 
+    self.ui.studyDateLineEdit.text = self.studyDate 
     
     self.ui.callingAETitleLineEdit.text = self.callingAETitle
     self.ui.calledAETitleLineEdit.text = self.calledAETitle 
@@ -411,7 +403,6 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
       self.calledHostStr = self.ui.calledHostLineEdit.text.strip()
       self.calledPortStr = self.ui.calledPortLineEdit.text.strip()
       self.preferCGET = self.ui.preferCGETCheckBox.checked
-      
       self.logic.process(queryFlag,self.patientIDStr,self.accessionNumberStr,self.modalityStr,self.seriesDescriptionStr,self.studyDateStr, \
         self.callingAETitleStr, self.calledAETitleStr,self.storageAETitleStr, self.calledHostStr,self.calledPortStr,self.preferCGET)
 
@@ -481,8 +472,6 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     Initialize parameter node with default settings.
     """
 
-    
-
 
   def process(self, queryFlag, patientID, accessionNumber,modalities,seriesDescription,studyDate,\
                callingAETitle, calledAETitle,storageAETitle, calledHost,calledPort,preferCGET):
@@ -545,12 +534,78 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     else:
         dicomQuery.filters = {'ID':patientID, 'AccessionNumber':accessionNumber, 'Modalities':modalities,'Series':seriesDescription}    
     
+    # database for storing query results
     
-    
-    # temporary in-memory database for storing query results
+    databaseFilePath = slicer.app.temporaryPath +'/query.sql'
+    import os
+    if os.path.exists(databaseFilePath):
+        os.remove(databaseFilePath)
+
     tempDb = ctk.ctkDICOMDatabase()
-    tempDb.openDatabase('')
+    tempDb.openDatabase(databaseFilePath)
     dicomQuery.query(tempDb)
+    
+    
+    import sqlite3
+
+    conn = sqlite3.connect(databaseFilePath)
+    cursor = conn.cursor()
+    print("Query database: " + databaseFilePath + "")
+    # Display Patients columns
+    print('\nColumns in PATIENTS table:')
+    data=cursor.execute('''SELECT * FROM PATIENTS''')
+    for column in data.description:
+        print(column[0])
+      
+    # Display Patients data
+    print('\nData in PATIENTS table:')
+    data=cursor.execute('''SELECT * FROM PATIENTS''')
+    for row in data:
+        print(row)
+
+    # Display number of rows in Patients data
+    print('\nNumber of rows in in PATIENTS table:')
+    numberPatientsStr=cursor.execute('''SELECT COUNT(*) FROM PATIENTS''').fetchone()[0]
+    numberPatients = int(numberPatientsStr)
+    print(str(numberPatients))
+      
+    # Display Studies columns
+    print('\nColumns in STUDIES table:')
+    data=cursor.execute('''SELECT * FROM STUDIES''')
+    for column in data.description:
+        print(column[0])
+      
+    # Display Studies data
+    print('\nData in STUDIES table:')
+    data=cursor.execute('''SELECT * FROM STUDIES''')
+    for row in data:
+        print(row)
+
+    # Display Series columns
+    print('\nColumns in SERIRS table:')
+    data=cursor.execute('''SELECT * FROM SERIES''')
+    for column in data.description:
+        print(column[0])
+      
+    # Display Patients data
+    print('\nData in PATIENTS table:')
+    data=cursor.execute('''SELECT * FROM SERIES''')
+    for row in data:
+        print(row)
+    #cmd = "Select * FROM Patients;"
+    #c.execute(cmd)
+    #rows = c.fetchall()
+ 
+    #for row in rows:
+    #    print(row)
+    #commit the changes to db
+    conn.commit()
+    #close the connection
+    conn.close()
+ 
+    if numberPatients > 1 and queryFlag==0: 
+        if not slicer.util.confirmYesNoDisplay("Warning: Multiple patients selected for retrieval. Are you sure you want to continue?"):
+            return
 
     # Retrieve
     dicomRetrieve = ctk.ctkDICOMRetrieve()
@@ -563,6 +618,7 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     dicomRetrieve.setPort(dicomQuery.port)
     dicomRetrieve.setMoveDestinationAETitle(dicomQuery.callingAETitle)
     
+    
     patientList = tempDb.patients()
     if not patientList: 
         logging.info("No results.")
@@ -571,17 +627,17 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
         if not studyList: 
             logging.info("Patient detected, but no studies for this patient available.")
         else:             
-            seriesList = tempDb.seriesForStudy(studyList[0])
-            if not seriesList: 
+            seriesForStudyList = tempDb.seriesForStudy(studyList[0])
+            if not seriesForStudyList: 
                 logging.info("Patient and study detected, but no series for this patient and study available.")
             else:             
                 for study in studyList:
                     slicer.app.processEvents()
-                    for series in seriesList:
-                        slicer.app.processEvents()                    
+                    for series in seriesForStudyList:
+                        slicer.app.processEvents()
                         if queryFlag==0:
                             if dicomQuery.preferCGET:
-                                logging.info(f" ... getting STUDY:>{study}< SERIES:>{series}<")
+                                logging.info(f" ... getting patientID:{study} STUDY:>{study}< SERIES:>{series}<")
                                 success = dicomRetrieve.getSeries(str(study),str(series))
                                 logging.info(f"  - {'success' if success else 'failed'}")
                             else: 
@@ -591,8 +647,6 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
                         else:
                              logging.info(f" ... detected STUDY:>{study}< SERIES:>{series}<")
 
-        
-    slicer.dicomDatabase.updateDisplayedFields()
     
     stopTime = time.time()
     logging.info('Processing completed in {0:.2f} seconds'.format(stopTime-startTime))
