@@ -474,7 +474,7 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     """
 
 
-  def process(self, queryFlag, checkNumberPatients = 0, patientID, accessionNumber,modalities,seriesDescription,studyDate,\
+  def process(self, queryFlag, checkNumberPatients, patientID, accessionNumber,modalities,seriesDescription,studyDate,\
                callingAETitle, calledAETitle,storageAETitle, calledHost,calledPort,preferCGET):
     """
     Run the processing algorithm.
