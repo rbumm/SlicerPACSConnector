@@ -583,13 +583,13 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
         print(row)
 
     # Display Series columns
-    print('\nColumns in SERIRS table:')
+    print('\nColumns in SERIES table:')
     data=cursor.execute('''SELECT * FROM SERIES''')
     for column in data.description:
         print(column[0])
       
     # Display Patients data
-    print('\nData in PATIENTS table:')
+    print('\nData in SERIES table:')
     data=cursor.execute('''SELECT * FROM SERIES''')
     for row in data:
         print(row)
