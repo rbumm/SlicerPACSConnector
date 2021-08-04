@@ -596,6 +596,12 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
  
     #for row in rows:
     #    print(row)
+
+    #commit the changes to db
+    conn.commit()
+    #close the connection
+    conn.close()
+
  
     if numberPatients > 1 and checkNumberPatients and queryFlag==0: 
         if not slicer.util.confirmYesNoDisplay("Warning: Multiple patients selected for retrieval. Are you sure you want to continue?"):
@@ -612,27 +618,34 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     dicomRetrieve.setPort(dicomQuery.port)
     dicomRetrieve.setMoveDestinationAETitle(dicomQuery.callingAETitle)
 
-    #need to do this again, cursor seems to vanish
-    seriesData=cursor.execute('''SELECT * FROM SERIES''') 
-    for row in seriesData:
-        series=row[0]
-        study=row[1]
-        print(series)
-        if queryFlag==0:
-            if dicomQuery.preferCGET:
-                print(f" ... getting STUDY:>{study}< SERIES:>{series}<")
-                success = dicomRetrieve.getSeries(str(study),str(series))
-                print(f"  - {'success' if success else 'failed'}")
-            else: 
-                print(f" ... moving STUDY:>{study}< SERIES:>{series}<")
-                success = dicomRetrieve.moveSeries(str(study),str(series))
-                print(f"  - {'success' if success else 'failed'}")
-     
-
-    #commit the changes to db
-    conn.commit()
-    #close the connection
-    conn.close()
+    patientList = tempDb.patients()
+    if not patientList: 
+        logging.info("No results.")
+        return
+    for patient in patientList: 
+        studyList = tempDb.studiesForPatient(patient)
+        if not studyList: 
+            continue
+        else:
+            for study in studyList: 
+                seriesForStudyList = tempDb.seriesForStudy(study)
+                if not seriesForStudyList: 
+                    continue
+                else:             
+                    slicer.app.processEvents()
+                    for series in seriesForStudyList:
+                        slicer.app.processEvents()
+                        if queryFlag==0:
+                            if dicomQuery.preferCGET:
+                                logging.info(f" ... getting patientID:{study} STUDY:>{study}< SERIES:>{series}<")
+                                success = dicomRetrieve.getSeries(str(study),str(series))
+                                logging.info(f"  - {'success' if success else 'failed'}")
+                            else: 
+                                logging.info(f" ... moving STUDY:>{study}< SERIES:>{series}<")
+                                success = dicomRetrieve.moveSeries(str(study),str(series))
+                                logging.info(f"  - {'success' if success else 'failed'}")
+                        else:
+                             logging.info(f" ... detected STUDY:>{study}< SERIES:>{series}<")
 
     stopTime = time.time()
     logging.info('Processing completed in {0:.2f} seconds'.format(stopTime-startTime))
