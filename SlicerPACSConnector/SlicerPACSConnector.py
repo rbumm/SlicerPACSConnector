@@ -391,6 +391,7 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     try:
       # Compute output
       queryFlag = 1
+      checkNumberPatients = 1
       
       self.patientIDStr = self.ui.patientIDLineEdit.text.strip()
       self.accessionNumberStr = self.ui.accessionNumberLineEdit.text.strip()
@@ -403,7 +404,7 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
       self.calledHostStr = self.ui.calledHostLineEdit.text.strip()
       self.calledPortStr = self.ui.calledPortLineEdit.text.strip()
       self.preferCGET = self.ui.preferCGETCheckBox.checked
-      self.logic.process(queryFlag,self.patientIDStr,self.accessionNumberStr,self.modalityStr,self.seriesDescriptionStr,self.studyDateStr, \
+      self.logic.process(queryFlag,checkNumberPatients,self.patientIDStr,self.accessionNumberStr,self.modalityStr,self.seriesDescriptionStr,self.studyDateStr, \
         self.callingAETitleStr, self.calledAETitleStr,self.storageAETitleStr, self.calledHostStr,self.calledPortStr,self.preferCGET)
 
 
@@ -420,7 +421,7 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
 
       # Compute output
       queryFlag = 0
-      
+      checkNumberPatients = 1
       self.patientIDStr = self.ui.patientIDLineEdit.text.strip()
       self.accessionNumberStr = self.ui.accessionNumberLineEdit.text.strip()
       self.modalityStr = self.ui.modalityLineEdit.text.strip()
@@ -434,7 +435,7 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
       self.preferCGET = self.ui.preferCGETCheckBox.checked
       if self.showRetrievalWarning:
           slicer.util.delayDisplay('Expect several minutes of waiting time depending on your query.\nEnd of progress will be shown in the python console.',3000)
-      self.logic.process(queryFlag,self.patientIDStr,self.accessionNumberStr,self.modalityStr,self.seriesDescriptionStr,self.studyDateStr, \
+      self.logic.process(queryFlag,checkNumberPatients,self.patientIDStr,self.accessionNumberStr,self.modalityStr,self.seriesDescriptionStr,self.studyDateStr, \
         self.callingAETitleStr, self.calledAETitleStr,self.storageAETitleStr, self.calledHostStr,self.calledPortStr,self.preferCGET)
       if self.showRetrievalWarning:
           slicer.util.delayDisplay('Normal end of processing. Check the DICOM database for new data \nand remember, that data may still be loading in the background.',10000)
@@ -473,7 +474,7 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     """
 
 
-  def process(self, queryFlag, patientID, accessionNumber,modalities,seriesDescription,studyDate,\
+  def process(self, queryFlag, checkNumberPatients = 0, patientID, accessionNumber,modalities,seriesDescription,studyDate,\
                callingAETitle, calledAETitle,storageAETitle, calledHost,calledPort,preferCGET):
     """
     Run the processing algorithm.
@@ -603,7 +604,7 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     #close the connection
     conn.close()
  
-    if numberPatients > 1 and queryFlag==0: 
+    if numberPatients > 1 and checkNumberPatients and queryFlag==0: 
         if not slicer.util.confirmYesNoDisplay("Warning: Multiple patients selected for retrieval. Are you sure you want to continue?"):
             return
 
