@@ -554,14 +554,13 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     print("Query database: " + databaseFilePath + "")
     # Display Patients columns
     print('\nColumns in PATIENTS table:')
-    data=cursor.execute('''SELECT * FROM PATIENTS''')
-    for column in data.description:
+    patientsData=cursor.execute('''SELECT * FROM PATIENTS''')
+    for column in patientsData.description:
         print(column[0])
       
     # Display Patients data
     print('\nData in PATIENTS table:')
-    data=cursor.execute('''SELECT * FROM PATIENTS''')
-    for row in data:
+    for row in patientsData:
         print(row)
 
     # Display number of rows in Patients data
@@ -572,26 +571,24 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
       
     # Display Studies columns
     print('\nColumns in STUDIES table:')
-    data=cursor.execute('''SELECT * FROM STUDIES''')
-    for column in data.description:
+    studiesData=cursor.execute('''SELECT * FROM STUDIES''')
+    for column in studiesData.description:
         print(column[0])
       
     # Display Studies data
     print('\nData in STUDIES table:')
-    data=cursor.execute('''SELECT * FROM STUDIES''')
-    for row in data:
+    for row in studiesData:
         print(row)
 
     # Display Series columns
     print('\nColumns in SERIES table:')
-    data=cursor.execute('''SELECT * FROM SERIES''')
-    for column in data.description:
+    seriesData=cursor.execute('''SELECT * FROM SERIES''')
+    for column in seriesData.description:
         print(column[0])
       
     # Display Patients data
     print('\nData in SERIES table:')
-    data=cursor.execute('''SELECT * FROM SERIES''')
-    for row in data:
+    for row in seriesData:
         print(row)
     #cmd = "Select * FROM Patients;"
     #c.execute(cmd)
@@ -599,10 +596,6 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
  
     #for row in rows:
     #    print(row)
-    #commit the changes to db
-    conn.commit()
-    #close the connection
-    conn.close()
  
     if numberPatients > 1 and checkNumberPatients and queryFlag==0: 
         if not slicer.util.confirmYesNoDisplay("Warning: Multiple patients selected for retrieval. Are you sure you want to continue?"):
@@ -618,40 +611,31 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     dicomRetrieve.setHost(dicomQuery.host)
     dicomRetrieve.setPort(dicomQuery.port)
     dicomRetrieve.setMoveDestinationAETitle(dicomQuery.callingAETitle)
-    
-    
-    patientList = tempDb.patients()
-    if not patientList: 
-        logging.info("No results.")
-    else: 
-        studyList = tempDb.studiesForPatient(patientList[0])
-        if not studyList: 
-            logging.info("Patient detected, but no studies for this patient available.")
-        else:             
-            seriesForStudyList = tempDb.seriesForStudy(studyList[0])
-            if not seriesForStudyList: 
-                logging.info("Patient and study detected, but no series for this patient and study available.")
-            else:             
-                for study in studyList:
-                    slicer.app.processEvents()
-                    for series in seriesForStudyList:
-                        slicer.app.processEvents()
-                        if queryFlag==0:
-                            if dicomQuery.preferCGET:
-                                logging.info(f" ... getting patientID:{study} STUDY:>{study}< SERIES:>{series}<")
-                                success = dicomRetrieve.getSeries(str(study),str(series))
-                                logging.info(f"  - {'success' if success else 'failed'}")
-                            else: 
-                                logging.info(f" ... moving STUDY:>{study}< SERIES:>{series}<")
-                                success = dicomRetrieve.moveSeries(str(study),str(series))
-                                logging.info(f"  - {'success' if success else 'failed'}")
-                        else:
-                             logging.info(f" ... detected STUDY:>{study}< SERIES:>{series}<")
 
-    
+    #need to do this again, cursor seems to vanish
+    seriesData=cursor.execute('''SELECT * FROM SERIES''') 
+    for row in seriesData:
+        series=row[0]
+        study=row[1]
+        print(series)
+        if queryFlag==0:
+            if dicomQuery.preferCGET:
+                print(f" ... getting STUDY:>{study}< SERIES:>{series}<")
+                success = dicomRetrieve.getSeries(str(study),str(series))
+                print(f"  - {'success' if success else 'failed'}")
+            else: 
+                print(f" ... moving STUDY:>{study}< SERIES:>{series}<")
+                success = dicomRetrieve.moveSeries(str(study),str(series))
+                print(f"  - {'success' if success else 'failed'}")
+     
+
+    #commit the changes to db
+    conn.commit()
+    #close the connection
+    conn.close()
+
     stopTime = time.time()
     logging.info('Processing completed in {0:.2f} seconds'.format(stopTime-startTime))
-
 #
 # SlicerPACSConnectorTest
 #
