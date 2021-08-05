@@ -522,130 +522,134 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
       port = str(slicer.dicomListener.port) if hasattr(slicer, 'dicomListener') else "unknown"
       logging.info("DICOM listener running at port "+port)
    
-    # Query
-    dicomQuery = ctk.ctkDICOMQuery()
-    dicomQuery.callingAETitle = callingAETitle
-    dicomQuery.calledAETitle = calledAETitle
-    dicomQuery.host = calledHost
-    dicomQuery.port = int(calledPort)
-    dicomQuery.preferCGET = bool(preferCGET)
-    
-    if len(studyDate)>0: 
-        dicomQuery.filters = {'ID':patientID, 'AccessionNumber':accessionNumber, 'Modalities':modalities,'Series':seriesDescription,'StartDate':studyDate,'EndDate':studyDate}    
-    else:
-        dicomQuery.filters = {'ID':patientID, 'AccessionNumber':accessionNumber, 'Modalities':modalities,'Series':seriesDescription}    
-    
-    # database for storing query results
     
     databaseFilePath = slicer.app.temporaryPath +'/query.sql'
-    import os
-    if os.path.exists(databaseFilePath):
-        os.remove(databaseFilePath)
-
-    tempDb = ctk.ctkDICOMDatabase()
-    tempDb.openDatabase(databaseFilePath)
-    dicomQuery.query(tempDb)
+        
+    patientIdStrList = patientID.split(";")
     
-    
-    import sqlite3
-
-    conn = sqlite3.connect(databaseFilePath)
-    cursor = conn.cursor()
-    print("Query database: " + databaseFilePath + "")
-    # Display Patients columns
-    print('\nColumns in PATIENTS table:')
-    patientsData=cursor.execute('''SELECT * FROM PATIENTS''')
-    for column in patientsData.description:
-        print(column[0])
-      
-    # Display Patients data
-    print('\nData in PATIENTS table:')
-    for row in patientsData:
-        print(row)
-
-    # Display number of rows in Patients data
-    print('\nNumber of rows in in PATIENTS table:')
-    numberPatientsStr=cursor.execute('''SELECT COUNT(*) FROM PATIENTS''').fetchone()[0]
-    numberPatients = int(numberPatientsStr)
-    print(str(numberPatients))
-      
-    # Display Studies columns
-    print('\nColumns in STUDIES table:')
-    studiesData=cursor.execute('''SELECT * FROM STUDIES''')
-    for column in studiesData.description:
-        print(column[0])
-      
-    # Display Studies data
-    print('\nData in STUDIES table:')
-    for row in studiesData:
-        print(row)
-
-    # Display Series columns
-    print('\nColumns in SERIES table:')
-    seriesData=cursor.execute('''SELECT * FROM SERIES''')
-    for column in seriesData.description:
-        print(column[0])
-      
-    # Display Patients data
-    print('\nData in SERIES table:')
-    for row in seriesData:
-        print(row)
-    #cmd = "Select * FROM Patients;"
-    #c.execute(cmd)
-    #rows = c.fetchall()
- 
-    #for row in rows:
-    #    print(row)
-
-    #commit the changes to db
-    conn.commit()
-    #close the connection
-    conn.close()
-
- 
-    if numberPatients > 1 and checkNumberPatients and queryFlag==0: 
-        if not slicer.util.confirmYesNoDisplay("Warning: Multiple patients selected for retrieval. Are you sure you want to continue?"):
+    for patientIdStr in patientIdStrList:     
+        if patientIdStr=="":
             return
-
-    # Retrieve
-    dicomRetrieve = ctk.ctkDICOMRetrieve()
-    dicomRetrieve.setDatabase(slicer.dicomDatabase)
-    dicomRetrieve.keepAssociationOpen = True
-    dicomRetrieve.connect("progress(QString)", print)
-    dicomRetrieve.setCallingAETitle(dicomQuery.callingAETitle)
-    dicomRetrieve.setCalledAETitle(dicomQuery.calledAETitle)
-    dicomRetrieve.setHost(dicomQuery.host)
-    dicomRetrieve.setPort(dicomQuery.port)
-    dicomRetrieve.setMoveDestinationAETitle(dicomQuery.callingAETitle)
-
-    patientList = tempDb.patients()
-    if not patientList: 
-        logging.info("No results.")
-        return
-    for patient in patientList: 
-        studyList = tempDb.studiesForPatient(patient)
-        if not studyList: 
-            continue
+        print("Querying patient ID >*" + patientIdStr +"*< ...")
+        
+        # Query
+        dicomQuery = ctk.ctkDICOMQuery()
+        dicomQuery.callingAETitle = callingAETitle
+        dicomQuery.calledAETitle = calledAETitle
+        dicomQuery.host = calledHost
+        dicomQuery.port = int(calledPort)
+        dicomQuery.preferCGET = bool(preferCGET)
+    
+        if len(studyDate)>0: 
+            dicomQuery.filters = {'ID':patientIdStr, 'AccessionNumber':accessionNumber, 'Modalities':modalities,'Series':seriesDescription,'StartDate':studyDate,'EndDate':studyDate}    
         else:
-            for study in studyList: 
-                seriesForStudyList = tempDb.seriesForStudy(study)
-                if not seriesForStudyList: 
-                    continue
-                else:             
-                    slicer.app.processEvents()
-                    for series in seriesForStudyList:
+            dicomQuery.filters = {'ID':patientIdStr, 'AccessionNumber':accessionNumber, 'Modalities':modalities,'Series':seriesDescription}    
+        
+        # database for storing query results
+        tempDb = ctk.ctkDICOMDatabase()
+        tempDb.openDatabase(databaseFilePath)
+        dicomQuery.query(tempDb)
+        
+        import sqlite3
+
+        conn = sqlite3.connect(databaseFilePath)
+        cursor = conn.cursor()
+        print("Query database: " + databaseFilePath + "")
+        # Display Patients columns
+        print('\nColumns in PATIENTS table:')
+        patientsData=cursor.execute('''SELECT * FROM PATIENTS''')
+        for column in patientsData.description:
+            print(column[0])
+          
+        # Display Patients data
+        print('\nData in PATIENTS table:')
+        for row in patientsData:
+            print(row)
+
+        # Display number of rows in Patients data
+        print('\nNumber of rows in in PATIENTS table:')
+        numberPatientsStr=cursor.execute('''SELECT COUNT(*) FROM PATIENTS''').fetchone()[0]
+        numberPatients = int(numberPatientsStr)
+        print(str(numberPatients))
+          
+        # Display Studies columns
+        print('\nColumns in STUDIES table:')
+        studiesData=cursor.execute('''SELECT * FROM STUDIES''')
+        for column in studiesData.description:
+            print(column[0])
+          
+        # Display Studies data
+        print('\nData in STUDIES table:')
+        for row in studiesData:
+            print(row)
+
+        # Display Series columns
+        print('\nColumns in SERIES table:')
+        seriesData=cursor.execute('''SELECT * FROM SERIES''')
+        for column in seriesData.description:
+            print(column[0])
+          
+        # Display Patients data
+        print('\nData in SERIES table:')
+        for row in seriesData:
+            print(row)
+
+        #commit the changes to db
+        conn.commit()
+        #close the connection
+        conn.close()
+     
+        if numberPatients > 1 and checkNumberPatients and queryFlag==0: 
+            if not slicer.util.confirmYesNoDisplay("Warning: Multiple patients selected for retrieval. Are you sure you want to continue?"):
+                return
+
+        # Retrieve
+        dicomRetrieve = ctk.ctkDICOMRetrieve()
+        dicomRetrieve.setDatabase(slicer.dicomDatabase)
+        dicomRetrieve.keepAssociationOpen = True
+        dicomRetrieve.connect("progress(QString)", print)
+        dicomRetrieve.setCallingAETitle(dicomQuery.callingAETitle)
+        dicomRetrieve.setCalledAETitle(dicomQuery.calledAETitle)
+        dicomRetrieve.setHost(dicomQuery.host)
+        dicomRetrieve.setPort(dicomQuery.port)
+        dicomRetrieve.setMoveDestinationAETitle(dicomQuery.callingAETitle)
+
+        import os
+        patientList = tempDb.patients()
+        if not patientList: 
+            logging.info("No results.")
+            tempDb.closeDatabase()
+            if os.path.exists(databaseFilePath):
+                os.remove(databaseFilePath)
+            return
+        for patient in patientList: 
+            studyList = tempDb.studiesForPatient(patient)
+            if not studyList: 
+                continue
+            else:
+                for study in studyList: 
+                    seriesForStudyList = tempDb.seriesForStudy(study)
+                    if not seriesForStudyList: 
+                        continue
+                    else:             
                         slicer.app.processEvents()
-                        if queryFlag==0:
-                            if dicomQuery.preferCGET:
-                                logging.info(f" ... getting patientID:{study} STUDY:>{study}< SERIES:>{series}<")
-                                success = dicomRetrieve.getSeries(str(study),str(series))
-                                logging.info(f"  - {'success' if success else 'failed'}")
-                            else: 
-                                logging.info(f" ... moving STUDY:>{study}< SERIES:>{series}<")
-                                success = dicomRetrieve.moveSeries(str(study),str(series))
-                                logging.info(f"  - {'success' if success else 'failed'}")
-                        else:
-                             logging.info(f" ... detected STUDY:>{study}< SERIES:>{series}<")
+                        for series in seriesForStudyList:
+                            slicer.app.processEvents()
+                            if queryFlag==0:
+                                if dicomQuery.preferCGET:
+                                    logging.info(f" ... getting patientID:{study} STUDY:>{study}< SERIES:>{series}<")
+                                    success = dicomRetrieve.getSeries(str(study),str(series))
+                                    logging.info(f"  - {'success' if success else 'failed'}")
+                                else: 
+                                    logging.info(f" ... moving STUDY:>{study}< SERIES:>{series}<")
+                                    success = dicomRetrieve.moveSeries(str(study),str(series))
+                                    logging.info(f"  - {'success' if success else 'failed'}")
+                            else:
+                                 logging.info(f" ... detected STUDY:>{study}< SERIES:>{series}<")
+        tempDb.closeDatabase()
+        if os.path.exists(databaseFilePath):
+            os.remove(databaseFilePath)
+
 
     stopTime = time.time()
     logging.info('Processing completed in {0:.2f} seconds'.format(stopTime-startTime))
