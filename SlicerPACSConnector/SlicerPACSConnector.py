@@ -473,6 +473,9 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
     Initialize parameter node with default settings.
     """
 
+  def showStatusMessage(self, msg, timeoutMsec=500):
+    slicer.util.showStatusMessage(msg, timeoutMsec)
+    slicer.app.processEvents()
 
   def process(self, queryFlag, checkNumberPatients, patientID, accessionNumber,modalities,seriesDescription,studyDate,\
                callingAETitle, calledAETitle,storageAETitle, calledHost,calledPort,preferCGET):
@@ -527,10 +530,12 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
         
     patientIdStrList = patientID.split(";")
     
+    cnt=0
     for patientIdStr in patientIdStrList:     
         if patientIdStr=="":
             return
         print("Querying patient ID >*" + patientIdStr +"*< ...")
+        self.showStatusMessage(f'Querying #{cnt+1}: patientID  >{patientIdStr}< ...')
         
         # Query
         dicomQuery = ctk.ctkDICOMQuery()
@@ -649,6 +654,8 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
         tempDb.closeDatabase()
         if os.path.exists(databaseFilePath):
             os.remove(databaseFilePath)
+        cnt+=1
+
 
 
     stopTime = time.time()
