@@ -190,8 +190,6 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
     self.ui.calledPortLineEdit.text = self.calledPort
     self.ui.preferCGETCheckBox.checked = self.preferCGET
     
-
-
     # Make sure parameter node is initialized (needed for module reload)
     self.initializeParameterNode()
 
@@ -447,6 +445,8 @@ class SlicerPACSConnectorWidget(ScriptedLoadableModuleWidget, VTKObservationMixi
       import traceback
       traceback.print_exc()
 
+    # instantiate a new DICOM browser
+    slicer.util.selectModule("DICOM")
 
 #
 # SlicerPACSConnectorLogic
@@ -651,6 +651,14 @@ class SlicerPACSConnectorLogic(ScriptedLoadableModuleLogic):
                                     logging.info(f"  - {'success' if success else 'failed'}")
                             else:
                                  logging.info(f" ... detected STUDY:>{study}< SERIES:>{series}<")
+        if queryFlag==0:
+            waitStartTime = time.time()
+            dicomBrowser = slicer.modules.DICOMWidget.browserWidget.dicomBrowser
+            # wait for import to finish before proceeding (optional, if removed then import runs in the background)
+            dicomBrowser.waitForImportFinished()
+            waitStopTime = time.time()
+            logging.info('Waited for {0:.2f} seconds for the DICOM import to be finished.'.format(waitStopTime-waitStartTime))
+                                 
         tempDb.closeDatabase()
         if os.path.exists(databaseFilePath):
             os.remove(databaseFilePath)
